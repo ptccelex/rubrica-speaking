@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speaking Skills — Rúbrica Digital CEFR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #F8F6F1;
+    --surface: #FFFFFF;
+    --surface2: #F2EFE8;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1A1815;
+    --text2: #5C5850;
+    --text3: #9E9890;
+    --accent: #1D4E89;
+    --accent-light: #E8EFF8;
+    --accent2: #2E7D4F;
+    --accent2-light: #E8F4ED;
+    --warn: #B45309;
+    --warn-light: #FEF3E2;
+    --danger: #991B1B;
+    --danger-light: #FEE2E2;
+    --score-0: #E5E2DC;
+    --score-1: #FDE8C8;
+    --score-2: #FEF3C7;
+    --score-3: #D1FAE5;
+    --score-4: #BFDBFE;
+    --radius: 10px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+  }
+  .header-brand {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+  .header-brand h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+  .header-brand p {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+  .mic-icon {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .header-stats {
+    display: flex;
+    border-left: 1px solid rgba(255,255,255,0.15);
+  }
+  .hstat {
+    padding: 0.75rem 1.25rem;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+  }
+  .hstat .val { font-size: 22px; font-weight: 600; }
+  .hstat .lbl { font-size: 10px; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    padding: 0 1.5rem;
+  }
+  .tab {
+    padding: 0.8rem 1.2rem;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CAPTURE PANEL */
+  .capture-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-group { margin-bottom: 0.85rem; }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29,78,137,0.08);
+  }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .score-display {
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  .score-display .big-score { font-size: 52px; font-weight: 600; line-height: 1; }
+  .score-display .score-label { font-size: 11px; opacity: 0.75; margin-top: 4px; }
+  .score-display .score-grade {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* Rubric criteria */
+  .criterion {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.85rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .criterion-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .criterion-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .criterion-title { font-weight: 600; font-size: 13px; flex: 1; }
+  .criterion-weight { font-size: 11px; color: var(--text3); }
+  .criterion-score-badge {
+    min-width: 32px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--score-0);
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .chevron { font-size: 12px; color: var(--text3); transition: transform 0.2s; }
+  .criterion.open .chevron { transform: rotate(180deg); }
+
+  .criterion-body { padding: 0.85rem 1rem; display: none; }
+  .criterion.open .criterion-body { display: block; }
+
+  .score-buttons { display: flex; gap: 6px; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .score-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 6px 4px;
+    border: 1.5px solid var(--border2);
+    border-radius: 7px;
+    background: var(--surface);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    text-align: center;
+    transition: all 0.15s;
+    color: var(--text2);
+    line-height: 1.3;
+  }
+  .score-btn .pts { display: block; font-size: 17px; font-weight: 700; }
+  .score-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .score-btn.selected-0 { background: var(--score-1); border-color: #F59E0B; color: #92400E; }
+  .score-btn.selected-1 { background: var(--score-2); border-color: #D97706; color: #78350F; }
+  .score-btn.selected-2 { background: var(--score-3); border-color: #059669; color: #065F46; }
+  .score-btn.selected-3 { background: #DBEAFE; border-color: #3B82F6; color: #1E3A8A; }
+  .score-btn.selected-4 { background: #EDE9FE; border-color: #7C3AED; color: #3B0764; }
+
+  .descriptor {
+    font-size: 11.5px;
+    color: var(--text2);
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-height: 36px;
+    border-left: 3px solid var(--border2);
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #163D6E; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .btn-secondary:hover { background: var(--surface); }
+  .btn-success { background: var(--accent2); color: white; }
+  .btn-success:hover { background: #256040; }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #FECACA; }
+  .btn-danger:hover { background: #FEE2E2; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  .cta-row { display: flex; gap: 8px; margin-top: 1rem; }
+
+  /* RECORDS PANEL */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .filter-row select, .filter-row input[type=text] {
+    width: auto;
+    min-width: 140px;
+  }
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    box-shadow: var(--shadow);
+  }
+  .stat-card .val { font-size: 26px; font-weight: 600; color: var(--accent); }
+  .stat-card .lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .records-table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: var(--surface2);
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border2);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 7px 10px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .badge-a { background: #ECFDF5; color: #065F46; }
+  .badge-b { background: #EFF6FF; color: #1E40AF; }
+  .badge-c { background: #FEF3C7; color: #92400E; }
+  .badge-d { background: #FEE2E2; color: #991B1B; }
+
+  .score-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text3);
+  }
+  .empty-state svg { opacity: 0.3; margin-bottom: 0.75rem; }
+
+  /* SETTINGS PANEL */
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag .del {
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.6;
+    border: none;
+    background: none;
+    font-family: inherit;
+    padding: 0;
+  }
+  .tag .del:hover { opacity: 1; }
+  .add-row { display: flex; gap: 6px; margin-top: 8px; }
+  .add-row input { flex: 1; }
+
+  .rubric-preview {
+    overflow-x: auto;
+    margin-top: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .rubric-preview table { width: 100%; min-width: 700px; }
+  .rubric-preview thead th { background: var(--accent); color: white; font-size: 12px; text-transform: none; }
+  .rubric-preview tbody td { vertical-align: top; font-size: 11px; line-height: 1.4; padding: 8px 10px; }
+  .rubric-preview .cat-name { font-weight: 600; font-size: 12px; }
+  .rubric-preview .cat-icon { font-size: 16px; }
+  .level-cell-0 { background: #FFFBEB; }
+  .level-cell-1 { background: #ECFDF5; }
+  .level-cell-2 { background: #EFF6FF; }
+  .level-cell-3 { background: #F5F3FF; }
+
+  .export-section { margin-top: 1.25rem; }
+  .export-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.75rem; }
+
+  .progress-bar {
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin: 4px 0 0;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  @media (max-width: 768px) {
+    .capture-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+    .header-stats { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="mic-icon">🎙️</div>
+    <div>
+      <h1>Speaking Skills · Rúbrica CEFR</h1>
+      <p>Sistema de evaluación oral · Preparatoria</p>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="val" id="hst-total">0</div><div class="lbl">Registros</div></div>
+    <div class="hstat"><div class="val" id="hst-avg">—</div><div class="lbl">Promedio</div></div>
+    <div class="hstat"><div class="val" id="hst-teachers">0</div><div class="lbl">Maestros</div></div>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="switchTab('capture')">🎯 Capturar</div>
+  <div class="tab" onclick="switchTab('records')">📋 Registros</div>
+  <div class="tab" onclick="switchTab('export')">📥 Exportar</div>
+  <div class="tab" onclick="switchTab('settings')">⚙️ Configurar</div>
+</nav>
+
+<div class="main">
+
+<!-- CAPTURE -->
+<div id="panel-capture" class="panel active">
+  <div class="capture-grid">
+    <div>
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Datos del estudiante</h3>
+        <div class="form-group">
+          <label>Grupo</label>
+          <select id="f-group">
+            <option value="">— seleccionar —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nombre del estudiante</label>
+          <input type="text" id="f-student" placeholder="Apellido, Nombre">
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-group">
+          <label>Maestro evaluador</label>
+          <select id="f-teacher">
+            <option value="">— seleccionar —</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="score-display">
+        <div class="score-label">PUNTAJE TOTAL</div>
+        <div class="big-score" id="total-score">0</div>
+        <div style="font-size:12px; opacity:0.7; margin:4px 0;">de 100 puntos</div>
+        <div class="score-grade" id="grade-label">Sin evaluar</div>
+        <div style="font-size:11px; opacity:0.6; margin-top:6px;" id="criteria-count">0 de 6 criterios</div>
+      </div>
+
+      <div class="card">
+        <h3>Observaciones</h3>
+        <div class="form-group">
+          <label>Fortalezas</label>
+          <textarea id="f-strengths" placeholder="Lo que el estudiante hace bien…" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Áreas de mejora</label>
+          <textarea id="f-improve" placeholder="Puntos a trabajar…" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn btn-success btn-full" onclick="saveRecord()">💾 Guardar registro</button>
+        <button class="btn btn-secondary" onclick="clearForm()" title="Limpiar formulario">↺</button>
+      </div>
+    </div>
+
+    <!-- CRITERIA -->
+    <div id="criteria-list"></div>
+  </div>
+</div>
+
+<!-- RECORDS -->
+<div id="panel-records" class="panel">
+  <div class="summary-row">
+    <div class="stat-card"><div class="val" id="r-total">0</div><div class="lbl">Total registros</div></div>
+    <div class="stat-card"><div class="val" id="r-groups">0</div><div class="lbl">Grupos evaluados</div></div>
+    <div class="stat-card"><div class="val" id="r-avg">—</div><div class="lbl">Promedio general</div></div>
+    <div class="stat-card"><div class="val" id="r-teachers">0</div><div class="lbl">Maestros activos</div></div>
+  </div>
+
+  <div class="filter-row">
+    <input type="text" id="search-input" placeholder="🔍  Buscar estudiante…" style="width:200px;" oninput="renderTable()">
+    <select id="filter-group" onchange="renderTable()"><option value="">Todos los grupos</option></select>
+    <select id="filter-teacher" onchange="renderTable()"><option value="">Todos los maestros</option></select>
+    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">✕ Limpiar filtros</button>
+  </div>
+
+  <div class="card">
+    <div class="records-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Fecha</th><th>Grupo</th><th>Estudiante</th><th>Maestro</th>
+            <th>Pro</th><th>Flu</th><th>Voc</th><th>Com</th><th>Int</th>
+            <th>Total</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="records-tbody"></tbody>
+      </table>
+      <div id="empty-records" class="empty-state">
+        <div style="font-size:40px;margin-bottom:8px;opacity:0.3;">📋</div>
+        <p>No hay registros todavía.<br>Captura la primera evaluación en la pestaña Capturar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT -->
+<div id="panel-export" class="panel">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div class="card">
+      <h3>Exportar datos</h3>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:1rem;">Descarga todos los registros en el formato que necesites.</p>
+      <div class="export-btns">
+        <button class="btn btn-primary" onclick="exportXLSX()">📊 Descargar Excel (.xlsx)</button>
+        <button class="btn btn-secondary" onclick="exportCSV()">📄 Descargar CSV</button>
+        <button class="btn btn-secondary" onclick="exportJSON()">💾 Respaldo JSON</button>
+      </div>
+      <div style="margin-top:1.25rem; background:var(--surface2); border-radius:8px; padding:1rem;">
+        <p style="font-size:12px; font-weight:600; margin-bottom:6px;">El archivo Excel incluye 2 hojas:</p>
+        <ul style="font-size:12px; color:var(--text2); padding-left:1rem; line-height:2;">
+          <li><strong>Registros</strong> — todos los datos por estudiante con criterios individuales</li>
+          <li><strong>Resumen</strong> — promedios por grupo, maestro y nivel CEFR</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Importar / Restaurar</h3>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:1rem;">Restaura un respaldo previo en formato JSON.</p>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📂 Cargar JSON</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(this)">
+      <div style="margin-top:1.25rem;">
+        <div style="font-size:12px; color:var(--text3);">Registros actuales</div>
+        <div style="font-size:28px; font-weight:600; color:var(--accent);" id="export-count">0</div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;">
+      <h3>Rúbrica de referencia</h3>
+      <div class="rubric-preview">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:140px;">Criterio</th>
+              <th style="width:60px;">Peso</th>
+              <th class="level-cell-0">1 — Inicial</th>
+              <th class="level-cell-1">2 — En desarrollo</th>
+              <th class="level-cell-2">3 — Competente</th>
+              <th class="level-cell-3">4 — Destacado</th>
+            </tr>
+          </thead>
+          <tbody id="rubric-preview-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="panel-settings" class="panel">
+  <div class="settings-grid">
+    <div class="card">
+      <h3>Grupos</h3>
+      <div class="tag-list" id="groups-list"></div>
+      <div class="add-row">
+        <input type="text" id="new-group" placeholder="Ej. 3°A, Preparatoria 2…">
+        <button class="btn btn-primary btn-sm" onclick="addGroup()">+ Agregar</button>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="loadSampleGroups()">Cargar grupos de ejemplo</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Maestros</h3>
+      <div class="tag-list" id="teachers-list"></div>
+      <div class="add-row">
+        <input type="text" id="new-teacher" placeholder="Nombre del maestro…">
+        <button class="btn btn-primary btn-sm" onclick="addTeacher()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="card" style="grid-column:1/-1;">
+      <h3>Zona de peligro</h3>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:10px;">Estas acciones no se pueden deshacer.</p>
+      <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑️ Borrar TODOS los registros</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+const CRITERIA = [
+  {
+    id: 'pro', label: 'Pronunciación', icon: '🗣️', color: '#EFF6FF', weight: 15, abbr: 'Pro',
+    desc: 'Claridad y precisión al articular sonidos del inglés.',
+    levels: [
+      'Pronunciación muy difícil de entender; errores frecuentes que bloquean la comunicación.',
+      'Pronunciación comprensible con esfuerzo; errores frecuentes pero no siempre interrumpen el mensaje.',
+      'Pronunciación generalmente clara; algunos errores menores que no afectan la comprensión.',
+      'Pronunciación clara y natural; usa patrones de acento e entonación apropiados con mínimos errores.'
+    ]
+  },
+  {
+    id: 'flu', label: 'Fluidez y ritmo', icon: '🌊', color: '#F0FDF4', weight: 25, abbr: 'Flu',
+    desc: 'Continuidad del discurso, pausas naturales y velocidad.',
+    levels: [
+      'Habla muy pausada con silencios largos y frecuentes; discurso fragmentado.',
+      'Habla lenta con pausas notables; algunos titubeos que interrumpen el flujo.',
+      'Habla con ritmo aceptable; pausas ocasionales apropiadas; pocas interrupciones.',
+      'Habla con fluidez natural; pausas estratégicas; ritmo y velocidad apropiados.'
+    ]
+  },
+  {
+    id: 'voc', label: 'Vocabulario', icon: '📚', color: '#FFF7ED', weight: 25, abbr: 'Voc',
+    desc: 'Riqueza, precisión y variedad léxica en contexto.',
+    levels: [
+      'Vocabulario muy limitado; frecuente uso de L1 o palabras inapropiadas.',
+      'Vocabulario básico con intentos de variedad; algunas imprecisiones notables.',
+      'Vocabulario adecuado para el nivel; usa términos variados con pocas imprecisiones.',
+      'Vocabulario amplio y preciso; usa expresiones idiomáticas y registro apropiado.'
+    ]
+  },
+  {
+    id: 'com', label: 'Contenido y coherencia', icon: '💡', color: '#FFF1F2', weight: 25, abbr: 'Com',
+    desc: 'Relevancia del mensaje, organización y desarrollo de ideas.',
+    levels: [
+      'Ideas poco claras o irrelevantes; discurso sin estructura reconocible.',
+      'Ideas básicas presentes pero con poca organización; conexión limitada entre ellas.',
+      'Ideas claras y organizadas; desarrollo lógico aunque puede faltarle profundidad.',
+      'Ideas bien desarrolladas, organizadas y argumentadas; discurso cohesivo y relevante.'
+    ]
+  },
+  {
+    id: 'int', label: 'Interacción', icon: '🤝', color: '#F0FDF4', weight: 10, abbr: 'Int',
+    desc: 'Capacidad de responder, mantener la conversación y adaptarse.',
+    levels: [
+      'Respuestas mínimas; no puede mantener la conversación ni responder preguntas.',
+      'Responde con ayuda o repetición; dificultad para mantener el turno.',
+      'Responde apropiadamente; puede mantener la conversación con apoyo ocasional.',
+      'Interactúa con naturalidad; inicia y sostiene la conversación; adapta el discurso al interlocutor.'
+    ]
+  }
+];
+
+let records = JSON.parse(localStorage.getItem('speaking_records') || '[]');
+let groups = JSON.parse(localStorage.getItem('speaking_groups') || '["1°A","1°B","2°A","2°B","3°A","3°B"]');
+let teachers = JSON.parse(localStorage.getItem('speaking_teachers') || '[]');
+let scores = {};
+
+function save() {
+  localStorage.setItem('speaking_records', JSON.stringify(records));
+  localStorage.setItem('speaking_groups', JSON.stringify(groups));
+  localStorage.setItem('speaking_teachers', JSON.stringify(teachers));
+  updateHeaderStats();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'records') { updateFilters(); renderTable(); }
+  if (tab === 'export') { document.getElementById('export-count').textContent = records.length; renderRubricPreview(); }
+  if (tab === 'settings') renderSettings();
+}
+
+function renderCriteria() {
+  const container = document.getElementById('criteria-list');
+  container.innerHTML = '';
+  CRITERIA.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'criterion';
+    div.id = 'crit-' + c.id;
+    div.innerHTML = `
+      <div class="criterion-header" onclick="toggleCrit('${c.id}')">
+        <div class="criterion-icon" style="background:${c.color}">${c.icon}</div>
+        <div class="criterion-title">${c.label}</div>
+        <span class="criterion-weight">${c.weight}%</span>
+        <div class="criterion-score-badge" id="badge-${c.id}">—</div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="criterion-body">
+        <div style="font-size:12px; color:var(--text2); margin-bottom:8px;">${c.desc}</div>
+        <div class="score-buttons">
+          ${[1,2,3,4].map((pts,li) => `
+            <button class="score-btn" id="btn-${c.id}-${pts}" onclick="setScore('${c.id}',${pts},${li})">
+              <span class="pts">${pts}</span>${['Inicial','En desarrollo','Competente','Destacado'][li]}
+            </button>
+          `).join('')}
+        </div>
+        <div class="descriptor" id="desc-${c.id}">Selecciona un nivel para ver la descripción.</div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="pb-${c.id}" style="width:0%"></div></div>
+      </div>
+    `;
+    container.appendChild(div);
+    if (i === 0) { div.classList.add('open'); }
+  });
+}
+
+function toggleCrit(id) {
+  const el = document.getElementById('crit-' + id);
+  el.classList.toggle('open');
+}
+
+function setScore(id, pts, levelIdx) {
+  scores[id] = pts;
+  const c = CRITERIA.find(x => x.id === id);
+  [1,2,3,4].forEach((p, li) => {
+    const btn = document.getElementById(`btn-${id}-${p}`);
+    btn.className = 'score-btn';
+    if (p === pts) btn.classList.add('selected-' + li);
+  });
+  document.getElementById('desc-' + id).textContent = c.levels[levelIdx];
+  document.getElementById('desc-' + id).style.borderLeftColor = ['#F59E0B','#10B981','#3B82F6','#7C3AED'][levelIdx];
+  document.getElementById(`pb-${id}`).style.width = (pts / 4 * 100) + '%';
+  updateTotal();
+  const badge = document.getElementById('badge-' + id);
+  badge.textContent = pts;
+  const colors = ['var(--score-1)','var(--score-2)','var(--score-3)','var(--score-4)'];
+  badge.style.background = colors[levelIdx];
+  badge.style.color = ['#92400E','#065F46','#1E40AF','#4C1D95'][levelIdx];
+}
+
+function updateTotal() {
+  let total = 0, filled = 0;
+  CRITERIA.forEach(c => {
+    if (scores[c.id]) {
+      total += (scores[c.id] / 4) * c.weight;
+      filled++;
+    }
+  });
+  const rounded = Math.round(total);
+  document.getElementById('total-score').textContent = rounded;
+  document.getElementById('criteria-count').textContent = `${filled} de ${CRITERIA.length} criterios`;
+  const grade = getGrade(rounded);
+  document.getElementById('grade-label').textContent = grade.label;
+}
+
+function getGrade(score) {
+  if (score >= 90) return { label: 'A — Sobresaliente', cls: 'badge-a' };
+  if (score >= 80) return { label: 'B — Bueno', cls: 'badge-b' };
+  if (score >= 60) return { label: 'C — Suficiente', cls: 'badge-c' };
+  return { label: 'D — Insuficiente', cls: 'badge-d' };
+}
+
+function saveRecord() {
+  const student = document.getElementById('f-student').value.trim();
+  const group = document.getElementById('f-group').value;
+  const teacher = document.getElementById('f-teacher').value;
+  if (!student) { alert('Ingresa el nombre del estudiante.'); return; }
+  if (!group) { alert('Selecciona un grupo.'); return; }
+  if (!teacher) { alert('Selecciona el maestro evaluador.'); return; }
+  const filled = CRITERIA.filter(c => scores[c.id]).length;
+  if (filled < CRITERIA.length) {
+    if (!confirm(`Solo has evaluado ${filled} de ${CRITERIA.length} criterios. ¿Deseas guardar de todas formas?`)) return;
+  }
+  let total = 0;
+  CRITERIA.forEach(c => { if (scores[c.id]) total += (scores[c.id] / 4) * c.weight; });
+  const rec = {
+    id: Date.now(),
+    date: document.getElementById('f-date').value || new Date().toISOString().split('T')[0],
+    group,
+    student, teacher,
+    scores: { ...scores },
+    total: Math.round(total),
+    strengths: document.getElementById('f-strengths').value.trim(),
+    improve: document.getElementById('f-improve').value.trim()
+  };
+  records.push(rec);
+  save();
+  alert(`✅ Registro guardado: ${student} — ${rec.total}/100`);
+  clearForm();
+}
+
+function clearForm() {
+  document.getElementById('f-student').value = '';
+  document.getElementById('f-strengths').value = '';
+  document.getElementById('f-improve').value = '';
+  scores = {};
+  CRITERIA.forEach(c => {
+    [1,2,3,4].forEach(p => { document.getElementById(`btn-${c.id}-${p}`).className = 'score-btn'; });
+    document.getElementById('badge-' + c.id).textContent = '—';
+    document.getElementById('badge-' + c.id).style.background = 'var(--score-0)';
+    document.getElementById('badge-' + c.id).style.color = '';
+    document.getElementById('desc-' + c.id).textContent = 'Selecciona un nivel para ver la descripción.';
+    document.getElementById('desc-' + c.id).style.borderLeftColor = '';
+    document.getElementById('pb-' + c.id).style.width = '0%';
+  });
+  document.getElementById('total-score').textContent = '0';
+  document.getElementById('grade-label').textContent = 'Sin evaluar';
+  document.getElementById('criteria-count').textContent = '0 de 5 criterios';
+}
+
+function renderSelects() {
+  ['f-group', 'filter-group'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = id === 'f-group' ? '<option value="">— seleccionar —</option>' : '<option value="">Todos los grupos</option>';
+    groups.forEach(g => { const o = document.createElement('option'); o.value = o.textContent = g; sel.appendChild(o); });
+    sel.value = cur;
+  });
+  ['f-teacher', 'filter-teacher'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = id === 'f-teacher' ? '<option value="">— seleccionar —</option>' : '<option value="">Todos los maestros</option>';
+    teachers.forEach(t => { const o = document.createElement('option'); o.value = o.textContent = t; sel.appendChild(o); });
+    sel.value = cur;
+  });
+}
+
+function updateFilters() { renderSelects(); }
+
+function renderTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const fg = document.getElementById('filter-group').value;
+  const ft = document.getElementById('filter-teacher').value;
+  const filtered = records.filter(r =>
+    (!q || r.student.toLowerCase().includes(q)) &&
+    (!fg || r.group === fg) &&
+    (!ft || r.teacher === ft)
+  );
+  const tbody = document.getElementById('records-tbody');
+  tbody.innerHTML = '';
+  document.getElementById('empty-records').style.display = filtered.length ? 'none' : 'block';
+  filtered.sort((a,b) => b.id - a.id).forEach((r, i) => {
+    const grade = getGrade(r.total);
+    const scoreColor = r.total >= 90 ? '#065F46' : r.total >= 80 ? '#1E40AF' : r.total >= 60 ? '#92400E' : '#991B1B';
+    const scoreBg = r.total >= 90 ? '#ECFDF5' : r.total >= 80 ? '#EFF6FF' : r.total >= 60 ? '#FEF3C7' : '#FEE2E2';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text3)">${filtered.length - i}</td>
+      <td>${r.date}</td>
+      <td>${r.group}</td>
+      <td><strong>${r.student}</strong></td>
+      <td style="color:var(--text2)">${r.teacher}</td>
+      ${CRITERIA.map(c => `<td style="color:var(--text2)">${r.scores[c.id] || '—'}</td>`).join('')}
+      <td><span class="score-pill" style="background:${scoreBg};color:${scoreColor}">${r.total}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteRecord(${r.id})">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  const totals = filtered.map(r => r.total);
+  document.getElementById('r-total').textContent = filtered.length;
+  document.getElementById('r-groups').textContent = [...new Set(filtered.map(r => r.group))].length;
+  document.getElementById('r-avg').textContent = totals.length ? Math.round(totals.reduce((a,b)=>a+b,0)/totals.length) : '—';
+  document.getElementById('r-teachers').textContent = [...new Set(filtered.map(r => r.teacher))].length;
+}
+
+function deleteRecord(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  records = records.filter(r => r.id !== id);
+  save();
+  renderTable();
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('filter-group').value = '';
+  document.getElementById('filter-teacher').value = '';
+  renderTable();
+}
+
+function renderSettings() {
+  const gl = document.getElementById('groups-list');
+  gl.innerHTML = groups.map(g => `<span class="tag">${g}<button class="del" onclick="removeGroup('${g}')">×</button></span>`).join('');
+  const tl = document.getElementById('teachers-list');
+  tl.innerHTML = teachers.map(t => `<span class="tag">${t}<button class="del" onclick="removeTeacher('${t}')">×</button></span>`).join('');
+}
+
+function addGroup() {
+  const v = document.getElementById('new-group').value.trim();
+  if (!v || groups.includes(v)) return;
+  groups.push(v); save(); renderSettings(); renderSelects();
+  document.getElementById('new-group').value = '';
+}
+function removeGroup(g) { groups = groups.filter(x => x !== g); save(); renderSettings(); renderSelects(); }
+function addTeacher() {
+  const v = document.getElementById('new-teacher').value.trim();
+  if (!v || teachers.includes(v)) return;
+  teachers.push(v); save(); renderSettings(); renderSelects();
+  document.getElementById('new-teacher').value = '';
+}
+function removeTeacher(t) { teachers = teachers.filter(x => x !== t); save(); renderSettings(); renderSelects(); }
+
+function loadSampleGroups() {
+  ['1°A','1°B','1°C','2°A','2°B','2°C','3°A','3°B','3°C'].forEach(g => { if (!groups.includes(g)) groups.push(g); });
+  save(); renderSettings(); renderSelects();
+}
+
+function clearAll() {
+  if (!confirm('¿Borrar TODOS los registros? Esta acción no se puede deshacer.')) return;
+  records = []; save(); renderTable();
+}
+
+function updateHeaderStats() {
+  document.getElementById('hst-total').textContent = records.length;
+  const totals = records.map(r => r.total);
+  document.getElementById('hst-avg').textContent = totals.length ? Math.round(totals.reduce((a,b)=>a+b,0)/totals.length) : '—';
+  document.getElementById('hst-teachers').textContent = [...new Set(records.map(r => r.teacher))].length;
+}
+
+function exportXLSX() {
+  if (!records.length) { alert('No hay registros para exportar.'); return; }
+  const wb = XLSX.utils.book_new();
+  const data = [['Fecha','Grupo','Estudiante','Maestro','Pronunciación','Fluidez','Vocabulario','Contenido','Interacción','Total','Fortalezas','Áreas de mejora']];
+  records.forEach(r => data.push([r.date, r.group, r.student, r.teacher,
+    r.scores.pro||'', r.scores.flu||'', r.scores.voc||'', r.scores.com||'', r.scores.int||'',
+    r.total, r.strengths, r.improve]));
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, 'Registros');
+  // Summary
+  const byGroup = {};
+  records.forEach(r => { byGroup[r.group] = byGroup[r.group] || []; byGroup[r.group].push(r.total); });
+  const s2 = [['Resumen por grupo',''],['Grupo','Promedio']];
+  Object.entries(byGroup).forEach(([g,ts]) => s2.push([g, Math.round(ts.reduce((a,b)=>a+b,0)/ts.length)]));
+  s2.push(['','']); s2.push(['Resumen por maestro','']); s2.push(['Maestro','Promedio']);
+  const byT = {};
+  records.forEach(r => { byT[r.teacher] = byT[r.teacher] || []; byT[r.teacher].push(r.total); });
+  Object.entries(byT).forEach(([t,ts]) => s2.push([t, Math.round(ts.reduce((a,b)=>a+b,0)/ts.length)]));
+  const ws2 = XLSX.utils.aoa_to_sheet(s2);
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen');
+  XLSX.writeFile(wb, 'speaking_rubrica_' + new Date().toISOString().split('T')[0] + '.xlsx');
+}
+
+function exportCSV() {
+  if (!records.length) { alert('No hay registros.'); return; }
+  const rows = [['Fecha','Grupo','Estudiante','Maestro','Pro','Flu','Voc','Com','Int','Total']];
+  records.forEach(r => rows.push([r.date, r.group, r.student, r.teacher,
+    r.scores.pro||'', r.scores.flu||'', r.scores.voc||'', r.scores.com||'', r.scores.int||'', r.total]));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'speaking_rubrica.csv';
+  a.click();
+}
+
+function exportJSON() {
+  const data = JSON.stringify({ records, groups, teachers }, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
+  a.download = 'speaking_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+}
+
+function importJSON(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.records) records = data.records;
+      if (data.groups) groups = data.groups;
+      if (data.teachers) teachers = data.teachers;
+      save(); alert('✅ Datos importados: ' + records.length + ' registros.'); renderSelects();
+    } catch { alert('Error al leer el archivo JSON.'); }
+  };
+  reader.readAsText(file);
+}
+
+function renderRubricPreview() {
+  const tbody = document.getElementById('rubric-preview-body');
+  tbody.innerHTML = CRITERIA.map(c => `
+    <tr>
+      <td><div class="cat-icon">${c.icon}</div><div class="cat-name">${c.label}</div></td>
+      <td style="text-align:center;font-weight:600;">${c.weight}%</td>
+      ${c.levels.map((l,i) => `<td class="level-cell-${i}">${l}</td>`).join('')}
+    </tr>
+  `).join('');
+}
+
+document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+renderCriteria();
+renderSelects();
+updateHeaderStats();
+</script>
+</body>
+</html>
